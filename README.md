@@ -29,6 +29,10 @@ Saved as JSON under `%APPDATA%\com.encounters.app\data\`:
 `conditions.json` (custom conditions). An unreadable file is backed up as `*.corrupt-<time>.json`
 before a fresh one is started.
 
+Encounters also publishes its campaign list to `%APPDATA%\CampaignLink\encounters.json`, the folder it shares with
+Lorekeeper (format: the [campaign-link](https://github.com/ImDeadWeight/campaign-link) package). Not available in the
+browser or on Android yet.
+
 ## Layout
 
 - `src/domain` — pure logic, no React: formats (5e rules/stat block), combat engine, library tree.
