@@ -1,13 +1,14 @@
 /**
  * @file Edit dialogs for sidebar items: rename an area or encounter and change
  * which campaign/area it belongs to (areas can sit inside other areas), change
- * an empty encounter's format, or rename a campaign and set its default
- * format.
+ * an empty encounter's format, or rename a campaign, set its default format
+ * and link it to a Lorekeeper notebook.
  */
 import { useMemo, useState } from 'react';
 import type { FormatId } from '../../domain/formats/formatIds';
 import { descendantAreaIds, type EncounterDestination } from '../../domain/library/tree';
 import type { Id } from '../../domain/ids';
+import { linkCampaign, useCampaignLink } from '../../state/campaignLink';
 import { useLibrary } from '../../state/libraryStore';
 import { useUi } from '../../state/uiStore';
 import { FormatField } from '../common/FormatField';
@@ -15,6 +16,7 @@ import { Modal } from '../common/Modal';
 import { closeUnlessDirty } from '../common/unsavedChanges';
 import { ParentPicker } from '../create/ParentPicker';
 import { CampaignFormatField } from '../create/SimpleForms';
+import { LorekeeperNotebookField } from './LorekeeperNotebookField';
 
 /** Which item to edit. */
 interface Props {
@@ -118,15 +120,19 @@ export function EditCampaign({ id }: { id: Id }) {
   const closeModal = useUi((s) => s.closeModal);
   const [name, setName] = useState(campaign?.name ?? '');
   const [formatId, setFormatId] = useState(campaign?.formatId ?? null);
+  const [initialNotebook] = useState<Id | null>(() => useCampaignLink.getState().claims[id]?.partnerId ?? null);
+  const [notebookId, setNotebookId] = useState<Id | null>(initialNotebook);
   if (!campaign) return null;
-  const cancel = () => closeUnlessDirty(name !== campaign.name || formatId !== campaign.formatId, closeModal);
+  const dirty = name !== campaign.name || formatId !== campaign.formatId || notebookId !== initialNotebook;
+  const cancel = () => closeUnlessDirty(dirty, closeModal);
 
-  // Apply the rename and format, then close.
+  // Apply the rename, format and Lorekeeper link, then close.
   const save = () => {
     if (!name.trim()) return;
     const lib = useLibrary.getState();
     if (name.trim() !== campaign.name) lib.rename('campaign', id, name.trim());
     if (formatId !== campaign.formatId) lib.setCampaignFormat(id, formatId);
+    if (notebookId !== initialNotebook) linkCampaign(id, notebookId);
     closeModal();
   };
 
@@ -152,6 +158,7 @@ export function EditCampaign({ id }: { id: Id }) {
           New encounters in this campaign, and new characters created for them, start with this format. Existing
           encounters and characters are not changed.
         </p>
+        <LorekeeperNotebookField campaignId={id} value={notebookId} onChange={setNotebookId} />
       </div>
     </Modal>
   );

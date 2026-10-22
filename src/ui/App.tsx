@@ -8,6 +8,8 @@ import { EncounterView } from './encounter/EncounterView';
 import { ModalHost } from './ModalHost';
 import { Sidebar } from './sidebar/Sidebar';
 import { TopBar } from './TopBar';
+// After every component's styles, so touch mode can override them.
+import '../styles/touch.css';
 
 /** The whole app window. */
 export function App() {

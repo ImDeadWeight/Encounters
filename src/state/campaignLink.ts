@@ -1,71 +1,190 @@
 /**
- * @file Encounters' side of Campaign Link: publishes the list of campaigns
- * to the shared folder (encounters.json) so Lorekeeper can offer to link its
- * notebooks to them. Rewrites the file only when the list actually changed.
+ * @file Encounters' side of Campaign Link: links campaigns to Lorekeeper
+ * notebooks and keeps the shared folder up to date (see the campaign-link
+ * package). Publishes the campaign list and, for each linked campaign, its
+ * areas, encounters (combat state, who's in them) and characters; reads
+ * Lorekeeper's notebook list and the catalogue of each linked notebook.
+ *
+ * Link claims are per device (the folder is), so they live in their own
+ * campaign-link.json, not in campaigns (which would carry them into exports).
  */
-import { fileText, indexPath, makeIndex, readIndex, sameData, type AppIndex } from 'campaign-link';
+import {
+  createLinkSync,
+  makeEncountersCatalog,
+  readLorekeeperCatalog,
+  type AppIndex,
+  type EncountersCatalog,
+  type LinkClaim,
+  type LinkResolution,
+  type LinkSync,
+  type LorekeeperCatalog,
+} from 'campaign-link';
 import { create } from 'zustand';
-import { openLinkFolder, type LinkFolder } from '../storage/linkFolder';
+import { newId, type Id } from '../domain/ids';
+import { loadDocument, saveDocument } from '../storage/documents';
+import { openLinkFolder } from '../storage/linkFolder';
+import { useCharacters } from './characterStore';
 import { useLibrary } from './libraryStore';
 
-/** Whether Campaign Link works on this device, for showing in the UI. */
+/** How often to look at the other app's files while the window is visible. */
+const POLL_MS = 3000;
+/** Wait this long after a local change before publishing it. */
+const CHANGE_DELAY_MS = 800;
+/** This app's saved link claims. */
+const CLAIMS_DOC = 'campaign-link';
+
+/** Campaign Link state, for the UI. */
 interface LinkState {
   /** Full path of the shared folder, when available. */
   location: string | null;
-  /** Why linking is unavailable, or the last error publishing; null when all is well. */
+  /** Why linking can't work here, or the last error; null when all is well. */
   problem: string | null;
+  /** Each campaign's link to a Lorekeeper notebook, by campaign id. */
+  claims: Record<Id, LinkClaim>;
+  /** Each campaign's link status, by campaign id (absent until the first sync). */
+  status: Record<Id, LinkResolution['status']>;
+  /** Lorekeeper's notebook list; null until Lorekeeper has run on this device. */
+  partner: AppIndex | null;
+  /** Why Lorekeeper's list couldn't be read, if it couldn't. */
+  partnerProblem: string | null;
+  /** The linked notebook's catalogue, by campaign id. */
+  catalogs: Record<Id, LorekeeperCatalog>;
 }
 
-export const useCampaignLink = create<LinkState>(() => ({ location: null, problem: null }));
+export const useCampaignLink = create<LinkState>(() => ({
+  location: null,
+  problem: null,
+  claims: {},
+  status: {},
+  partner: null,
+  partnerProblem: null,
+  catalogs: {},
+}));
 
-/** The index as last written (or found on disk), to skip rewriting an unchanged one. */
-let published: AppIndex | null = null;
+/** Runs a sync pass soon (set once the folder is open). */
+let requestSync: (delay?: number) => void = () => undefined;
 
-/** Encounters' index: every campaign, not yet linked to anything. */
-function currentIndex(): AppIndex {
-  const campaigns = useLibrary.getState().campaigns;
-  return makeIndex(
-    'encounters',
-    campaigns.map((c) => ({ id: c.id, name: c.name, link: null })),
-  );
+/** Links a campaign to a Lorekeeper notebook, or unlinks it (null). Lorekeeper confirms on its next look. */
+export function linkCampaign(campaignId: Id, notebookId: Id | null) {
+  const current = useCampaignLink.getState().claims[campaignId];
+  if ((current?.partnerId ?? null) === notebookId) return;
+  setClaim(campaignId, notebookId ? { linkId: newId(), partnerId: notebookId, confirmed: false } : null);
+  requestSync(0);
 }
 
-/** Writes the index if it differs from what's published. */
-async function publish(folder: LinkFolder) {
-  const index = currentIndex();
-  if (sameData(index, published)) return;
-  await folder.write(indexPath('encounters'), fileText(index));
-  published = index;
+function setClaim(campaignId: Id, claim: LinkClaim | null) {
+  useCampaignLink.setState((s) => {
+    const { [campaignId]: _old, ...rest } = s.claims;
+    return { claims: claim ? { ...rest, [campaignId]: claim } : rest };
+  });
 }
 
-/** Opens the shared folder and keeps encounters.json up to date. Never throws: problems show in useCampaignLink. */
+/** What Lorekeeper needs to know about a campaign: its areas, encounters and the characters in them. */
+function buildCatalog(campaignId: Id): EncountersCatalog | null {
+  const { campaigns, areas, encounters } = useLibrary.getState();
+  const campaign = campaigns.find((c) => c.id === campaignId);
+  if (!campaign) return null;
+  const mine = encounters.filter((e) => e.campaignId === campaignId);
+  const used = new Set(mine.flatMap((e) => e.combatants.map((c) => c.templateId)));
+  return makeEncountersCatalog(campaignId, campaign.name, {
+    areas: areas
+      .filter((a) => a.campaignId === campaignId)
+      .map((a) => ({ id: a.id, name: a.name, parentAreaId: a.parentAreaId })),
+    encounters: mine.map((e) => ({
+      id: e.id,
+      name: e.name,
+      areaId: e.areaId,
+      inCombat: e.combat.active,
+      round: e.combat.active ? e.combat.round : 0,
+      combatants: e.combatants.map((c) => ({ characterId: c.templateId, name: c.name, status: c.status })),
+    })),
+    characters: useCharacters
+      .getState()
+      .templates.filter((t) => used.has(t.id))
+      .map((t) => ({ id: t.id, name: t.name, kind: t.kind, lorePageId: null })),
+  });
+}
+
+/** Starts linking. Never throws: problems show in useCampaignLink. */
 export async function startCampaignLink(): Promise<void> {
+  const saved = await loadDocument<{ claims: Record<Id, LinkClaim> }>(CLAIMS_DOC, () => ({ claims: {} }));
+  useCampaignLink.setState({ claims: saved.data.claims, problem: saved.warning ?? null });
+  useCampaignLink.subscribe((s, before) => {
+    if (s.claims !== before.claims) saveDocument(CLAIMS_DOC, { claims: s.claims }).catch(() => undefined);
+  });
+
   const access = await openLinkFolder();
   if (!access.available) {
     useCampaignLink.setState({ problem: access.reason });
     return;
   }
-  const { folder } = access;
-  useCampaignLink.setState({ location: folder.location });
+  useCampaignLink.setState({ location: access.folder.location });
 
-  const report = (err: unknown) => useCampaignLink.setState({ problem: `Could not update the Campaign Link folder: ${(err as Error).message}` });
-  // One publish at a time, so two quick changes can't write the same file at once.
-  let queue = Promise.resolve();
-  const run = () =>
-    (queue = queue
-      .then(() => publish(folder))
-      .then(() => useCampaignLink.setState({ problem: null }))
-      .catch(report));
-
-  try {
-    const existing = await folder.read(indexPath('encounters'));
-    published = existing ? readIndex(existing, 'encounters') : null;
-  } catch {
-    // A damaged or outdated file of our own is simply replaced.
-    published = null;
-  }
-  await run();
-  useLibrary.subscribe((s, before) => {
-    if (s.campaigns !== before.campaigns) run();
+  const sync: LinkSync = createLinkSync(access.folder, {
+    app: 'encounters',
+    campaigns: () => {
+      const { claims } = useCampaignLink.getState();
+      return useLibrary.getState().campaigns.map((c) => ({ id: c.id, name: c.name, link: claims[c.id] ?? null }));
+    },
+    setClaim,
+    catalog: async (campaignId) => buildCatalog(campaignId),
   });
+
+  /** One pass, then read the catalogue of every linked notebook. */
+  async function pass() {
+    const result = await sync.refresh();
+    const catalogs: Record<Id, LorekeeperCatalog> = {};
+    for (const [campaignId, claim] of Object.entries(useCampaignLink.getState().claims)) {
+      if (result.status[campaignId] !== 'linked') continue;
+      const text = await sync.readPartnerCatalog(claim.linkId).catch(() => null);
+      if (!text) continue;
+      try {
+        catalogs[campaignId] = readLorekeeperCatalog(text);
+      } catch {
+        // A damaged catalogue is skipped; the previous one stays until a good one arrives.
+        const previous = useCampaignLink.getState().catalogs[campaignId];
+        if (previous) catalogs[campaignId] = previous;
+      }
+    }
+    useCampaignLink.setState({ ...result, catalogs, problem: null });
+  }
+
+  // One pass at a time; requests during a pass run once it finishes.
+  let running = false;
+  let again = false;
+  let timer: ReturnType<typeof setTimeout> | undefined;
+  const run = async () => {
+    if (running) {
+      again = true;
+      return;
+    }
+    running = true;
+    try {
+      await pass();
+    } catch (err) {
+      useCampaignLink.setState({ problem: `Could not update the Campaign Link folder: ${(err as Error).message}` });
+    } finally {
+      running = false;
+      if (again) {
+        again = false;
+        run();
+      }
+    }
+  };
+  requestSync = (delay = CHANGE_DELAY_MS) => {
+    clearTimeout(timer);
+    timer = setTimeout(run, delay);
+  };
+
+  await run();
+  // Local changes Lorekeeper should see: campaigns, areas, encounters, combat state, characters.
+  useLibrary.subscribe(() => requestSync());
+  useCharacters.subscribe((s, before) => {
+    if (s.templates !== before.templates) requestSync();
+  });
+  // Changes Lorekeeper made: look when the window comes back, and every few seconds while it's visible.
+  window.addEventListener('focus', () => requestSync(0));
+  setInterval(() => {
+    if (document.visibilityState === 'visible') run();
+  }, POLL_MS);
 }
