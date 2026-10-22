@@ -33,6 +33,15 @@ Encounters also publishes its campaign list to `%APPDATA%\CampaignLink\encounter
 Lorekeeper (format: the [campaign-link](https://github.com/ImDeadWeight/campaign-link) package). Not available in the
 browser or on Android yet.
 
+## Working with Lorekeeper
+
+- **Link a campaign** to a Lorekeeper notebook in the campaign's edit dialog (Lorekeeper can start the link too).
+- **Name suggestions**: while naming a character, matching Character pages from linked notebooks appear under the
+  Name field. Picking one fills in the name and PC/NPC and remembers the page; the editor shows it, with
+  Open in Lorekeeper. The combatant panel has the same button.
+- **Links**: `encounters://encounter/<id>` and `encounters://character/<id>` open in Encounters (the running window,
+  if there is one). The scheme is registered each time the app starts, so development builds work too.
+
 ## Layout
 
 - `src/domain` — pure logic, no React: formats (5e rules/stat block), combat engine, library tree.
