@@ -1,9 +1,12 @@
 /**
- * @file Right panel: the selected combatant's name, status, token description,
- * stat block, and trackers (health, dying rolls, conditions).
+ * @file Right panel: the selected combatant's name (with a button to its
+ * Lorekeeper page, if it came from one), status, token description, stat
+ * block, and trackers (health, dying rolls, conditions).
  */
+import { BookOpen } from 'lucide-react';
 import type { Combatant } from '../../domain/combat/types';
 import type { Encounter } from '../../domain/library/types';
+import { openInLorekeeper } from '../../state/appLinks';
 import { useCharacters } from '../../state/characterStore';
 import { useEncounter } from '../../state/libraryStore';
 import { useUi } from '../../state/uiStore';
@@ -73,6 +76,11 @@ export function CombatantPanel() {
       <div className="combatant-header">
         <div className="row">
           <h2 className="spacer">{combatant.name}</h2>
+          {template?.lore && (
+            <button className="icon" title="Open in Lorekeeper" onClick={() => openInLorekeeper(template.lore!)}>
+              <BookOpen size={18} />
+            </button>
+          )}
           <span className="chip">{template?.kind === 'pc' ? 'PC' : 'NPC'}</span>
         </div>
         <StatusLine encounter={encounter} combatant={combatant} />

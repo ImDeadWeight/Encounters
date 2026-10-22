@@ -37,6 +37,14 @@ export interface CharacterTemplate {
   deathSaves: boolean;
   /** null when the stat block was skipped. */
   statBlock: StatBlock | null;
+  /** The Lorekeeper page this character came from; absent when it didn't come from one. */
+  lore?: LoreRef;
+}
+
+/** A page in a Lorekeeper notebook (see the campaign-link package). */
+export interface LoreRef {
+  notebookId: Id;
+  pageId: Id;
 }
 
 /** Whether a character follows the dying rules at 0 HP: always for PCs, opt-in for NPCs. */

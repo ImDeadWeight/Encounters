@@ -3,7 +3,7 @@
  * conditions, characters, combatants, encounters, areas, campaigns). Each
  * one turns untrusted JSON into a typed object or fails with the field path.
  */
-import type { CharacterTemplate, Tag } from '../characters';
+import type { CharacterTemplate, LoreRef, Tag } from '../characters';
 import { MIN_HP } from '../combat/health';
 import type { Combatant, CombatantStatus, CombatState, DyingProgress } from '../combat/types';
 import { MAX_CONDITION_VALUE, type ActiveCondition, type CustomCondition } from '../conditions';
@@ -71,7 +71,15 @@ export function readTemplate(v: unknown, path: string): CharacterTemplate {
     tagIds: readArray(o.tagIds, `${path}.tagIds`, readId, 200),
     deathSaves: readBool(o.deathSaves, `${path}.deathSaves`),
     statBlock: o.statBlock === null ? null : FORMATS[formatId].sanitizeStatBlock(o.statBlock, `${path}.statBlock`),
+    // Only characters made from a Lorekeeper page have one; kept absent otherwise so backups stay exact.
+    ...(o.lore !== undefined && { lore: readLoreRef(o.lore, `${path}.lore`) }),
   };
+}
+
+/** Which Lorekeeper page a character came from. */
+function readLoreRef(v: unknown, path: string): LoreRef {
+  const o = readObject(v, path);
+  return { notebookId: readId(o.notebookId, `${path}.notebookId`), pageId: readId(o.pageId, `${path}.pageId`) };
 }
 
 /** Older exports lack requiresResolve (defaults from the condition definition) and values (none). */

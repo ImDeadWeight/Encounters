@@ -4,6 +4,7 @@
  */
 import React from 'react';
 import ReactDOM from 'react-dom/client';
+import { startAppLinks } from './state/appLinks';
 import { startCampaignLink } from './state/campaignLink';
 import { startPersistence } from './state/persistence';
 import { App } from './ui/App';
@@ -24,6 +25,7 @@ startPersistence()
     );
     // Sharing with Lorekeeper starts in the background; it never holds up the app.
     startCampaignLink();
+    startAppLinks();
   })
   .catch((err: Error) => {
     root.render(<p className="empty-state">Encounters could not load its data: {err.message}</p>);

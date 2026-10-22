@@ -115,3 +115,25 @@
   flex: 1;
   font-weight: 600;
 }
+
+/* Name suggestions from Lorekeeper, under the Name field. */
+.lore-suggestions-title {
+  padding: 4px 10px 2px;
+  font-size: 12px;
+}
+
+.lore-suggestion {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+/* Which Lorekeeper page the character came from. */
+.lore-source {
+  align-items: center;
+  gap: 8px;
+  padding: 6px 10px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--panel-raised);
+}

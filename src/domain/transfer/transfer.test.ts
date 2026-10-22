@@ -276,3 +276,21 @@ describe('validation', () => {
     expect(sb.abilities.dex).toBe(10);
   });
 });
+
+describe('Lorekeeper links', () => {
+  it('a character made from a Lorekeeper page keeps the link through export and import', () => {
+    const carian: CharacterTemplate = { ...hero, id: 'carian', name: 'Carian', kind: 'npc', deathSaves: false, lore: { notebookId: 'nb', pageId: 'p-carian' } };
+    const file = roundTrip('characters', exportCharacters({ ...empty(), templates: [carian] }, ['carian']));
+    expect(file.data.templates[0].lore).toEqual({ notebookId: 'nb', pageId: 'p-carian' });
+  });
+
+  it('characters without one stay without one', () => {
+    const file = roundTrip('characters', exportCharacters({ ...empty(), templates: [hero] }, ['hero']));
+    expect('lore' in file.data.templates[0]).toBe(false);
+  });
+
+  it('rejects a damaged link', () => {
+    const bad = { ...hero, lore: { notebookId: 'nb' } } as unknown as CharacterTemplate;
+    expect(() => roundTrip('characters', exportCharacters({ ...empty(), templates: [bad] }, ['hero']))).toThrow('lore.pageId');
+  });
+});

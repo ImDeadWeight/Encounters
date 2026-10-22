@@ -86,6 +86,8 @@ function buildCatalog(campaignId: Id): EncountersCatalog | null {
   if (!campaign) return null;
   const mine = encounters.filter((e) => e.campaignId === campaignId);
   const used = new Set(mine.flatMap((e) => e.combatants.map((c) => c.templateId)));
+  // Only pages of the linked notebook mean anything to it.
+  const notebookId = useCampaignLink.getState().claims[campaignId]?.partnerId;
   return makeEncountersCatalog(campaignId, campaign.name, {
     areas: areas
       .filter((a) => a.campaignId === campaignId)
@@ -101,7 +103,12 @@ function buildCatalog(campaignId: Id): EncountersCatalog | null {
     characters: useCharacters
       .getState()
       .templates.filter((t) => used.has(t.id))
-      .map((t) => ({ id: t.id, name: t.name, kind: t.kind, lorePageId: null })),
+      .map((t) => ({
+        id: t.id,
+        name: t.name,
+        kind: t.kind,
+        lorePageId: t.lore && t.lore.notebookId === notebookId ? t.lore.pageId : null,
+      })),
   });
 }
 

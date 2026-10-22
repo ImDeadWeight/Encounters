@@ -29,7 +29,8 @@
 
   .tree-row,
   .combatant-row,
-  .picker-option {
+  .picker-option,
+  .lore-suggestion {
     min-height: 44px;
   }
 }

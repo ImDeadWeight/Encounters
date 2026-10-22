@@ -1,9 +1,10 @@
 /**
- * @file The create/edit character form: PC/NPC, name, format, tags, dying
- * rules, and the format's stat block editor.
+ * @file The create/edit character form: PC/NPC, name (with suggestions from
+ * linked Lorekeeper notebooks), format, tags, dying rules, and the format's
+ * stat block editor.
  */
 import { useCallback, useState } from 'react';
-import type { CharacterKind, CharacterTemplate, StatBlock } from '../../domain/characters';
+import type { CharacterKind, CharacterTemplate, LoreRef, StatBlock } from '../../domain/characters';
 import type { FormatId } from '../../domain/formats/formatIds';
 import type { DyingRules } from '../../domain/formats/formatTypes';
 import { FORMAT_LIST, getFormat } from '../../domain/formats/registry';
@@ -15,6 +16,7 @@ import { useLibrary } from '../../state/libraryStore';
 import { Select } from '../common/Select';
 import { closeUnlessDirty, useReportDirty } from '../common/unsavedChanges';
 import { FORMAT_UI } from '../formats/formatUi';
+import { LoreNameField, LoreSourceChip } from './LoreNameField';
 import { TagPicker } from './TagPicker';
 import './characters.css';
 
@@ -28,15 +30,17 @@ interface Draft {
   deathSaves: boolean;
   skipStatBlock: boolean;
   statBlock: StatBlock | null;
+  /** The Lorekeeper page it came from, if any. */
+  lore: LoreRef | null;
 }
 
 /** Form state for an existing template, or a blank NPC (in the default format, if any) for a new one. */
 function toDraft(t: CharacterTemplate | undefined, defaultFormatId: FormatId | null): Draft {
   if (!t) {
     const statBlock = defaultFormatId ? getFormat(defaultFormatId).createEmptyStatBlock() : null;
-    return { id: newId(), name: '', kind: 'npc', formatId: defaultFormatId ?? '', tagIds: [], deathSaves: false, skipStatBlock: false, statBlock };
+    return { id: newId(), name: '', kind: 'npc', formatId: defaultFormatId ?? '', tagIds: [], deathSaves: false, skipStatBlock: false, statBlock, lore: null };
   }
-  return { ...t, skipStatBlock: t.statBlock === null };
+  return { ...t, skipStatBlock: t.statBlock === null, lore: t.lore ?? null };
 }
 
 /** Checkbox text for following the format's dying rules; null when the format has none. */
@@ -99,6 +103,7 @@ export function CharacterEditor({ templateId, defaultFormatId = null, onDone, on
       tagIds: draft.tagIds,
       deathSaves: draft.kind === 'pc' || draft.deathSaves,
       statBlock: draft.skipStatBlock ? null : draft.statBlock,
+      ...(draft.lore && { lore: draft.lore }),
     };
     useCharacters.getState().saveTemplate(template);
     onDone(template);
@@ -123,10 +128,13 @@ export function CharacterEditor({ templateId, defaultFormatId = null, onDone, on
             onChange={(kind) => set({ kind })}
           />
         </label>
-        <label className="field grow">
-          Name
-          <input autoFocus value={draft.name} onChange={(e) => set({ name: e.target.value })} />
-        </label>
+        <LoreNameField
+          name={draft.name}
+          lore={draft.lore}
+          templateId={draft.id}
+          onName={(name) => set({ name })}
+          onPick={(c) => set({ name: c.title, kind: c.kind, lore: { notebookId: c.notebookId, pageId: c.pageId } })}
+        />
         <label className="field">
           Format
           <Select<FormatId | ''>
@@ -139,6 +147,7 @@ export function CharacterEditor({ templateId, defaultFormatId = null, onDone, on
           />
         </label>
       </div>
+      <LoreSourceChip lore={draft.lore} onForget={() => set({ lore: null })} />
 
       {/* Not a <label>: clicking a label would activate the first chip's remove button. */}
       <div className="field">
