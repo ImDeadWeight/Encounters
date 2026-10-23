@@ -26,7 +26,8 @@
   },
   "plugins": {
     "deep-link": {
-      "desktop": { "schemes": ["encounters"] }
+      "desktop": { "schemes": ["encounters"] },
+      "mobile": [{ "scheme": ["encounters"], "appLink": false }]
     }
   },
   "bundle": {

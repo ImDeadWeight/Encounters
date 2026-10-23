@@ -33,7 +33,8 @@ npm run tauri android build -- --debug --apk --target aarch64 --target x86_64   
 
 The APK lands in `src-tauri/gen/android/app/build/outputs/apk/universal/debug/`. On a phone the screens show one panel
 at a time; data comes over with Import (a Backup from the desktop app) through the system file picker, and Backup saves
-back out the same way. Linking with Lorekeeper isn't available on Android yet.
+back out the same way. To link with Lorekeeper on Android, choose the shared folder (e.g. `Documents/CampaignLink`)
+in a campaign's edit dialog, and choose the same folder in Lorekeeper; links between the apps work on Android too.
 
 ## Data
 
@@ -43,8 +44,9 @@ Saved as JSON under `%APPDATA%\com.encounters.app\data\`:
 before a fresh one is started.
 
 Encounters also publishes its campaign list to `%APPDATA%\CampaignLink\encounters.json`, the folder it shares with
-Lorekeeper (format: the [campaign-link](https://github.com/ImDeadWeight/campaign-link) package). Not available in the
-browser or on Android yet.
+Lorekeeper (format: the [campaign-link](https://github.com/ImDeadWeight/campaign-link) package). On Android the shared
+folder is one the user picks (the package's link-folder plugin reads and writes it); in a plain browser linking isn't
+available.
 
 ## Working with Lorekeeper
 

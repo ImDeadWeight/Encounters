@@ -1,10 +1,12 @@
 /**
  * @file The campaign editor's Lorekeeper field: which Lorekeeper notebook the
  * campaign is linked to (chosen from the notebooks Lorekeeper shares on this
- * device), and whether the link is confirmed.
+ * device), and whether the link is confirmed. On Android, also the shared
+ * folder (Choose folder… / Change).
  */
+import { FolderOpen } from 'lucide-react';
 import type { Id } from '../../domain/ids';
-import { useCampaignLink } from '../../state/campaignLink';
+import { chooseFolder, useCampaignLink } from '../../state/campaignLink';
 
 /** Notebook picker plus the link's status. `value` is the chosen notebook (applied when the dialog saves). */
 export function LorekeeperNotebookField({ campaignId, value, onChange }: { campaignId: Id; value: Id | null; onChange(v: Id | null): void }) {
@@ -13,12 +15,19 @@ export function LorekeeperNotebookField({ campaignId, value, onChange }: { campa
   const partnerProblem = useCampaignLink((s) => s.partnerProblem);
   const claim = useCampaignLink((s) => s.claims[campaignId] ?? null);
   const status = useCampaignLink((s) => s.status[campaignId]);
+  const canChooseFolder = useCampaignLink((s) => s.canChooseFolder);
+  const location = useCampaignLink((s) => s.location);
 
   if (problem) {
     return (
       <div className="field">
         Lorekeeper notebook
         <span className="muted">{problem}</span>
+        {canChooseFolder && (
+          <button type="button" className="choose-folder" onClick={() => chooseFolder()}>
+            <FolderOpen size={15} /> Choose folder…
+          </button>
+        )}
       </div>
     );
   }
@@ -57,6 +66,15 @@ export function LorekeeperNotebookField({ campaignId, value, onChange }: { campa
                   ? 'Waiting for Lorekeeper to confirm.'
                   : "Link a notebook to suggest its characters and places here, and show this campaign's encounters there."}
       </span>
+      {canChooseFolder && location && (
+        // Not inside the label's text: the button is its own control.
+        <span className="shared-folder muted">
+          Shared folder: <strong>{location}</strong>
+          <button type="button" className="choose-folder" onClick={(e) => { e.preventDefault(); chooseFolder(); }}>
+            Change
+          </button>
+        </span>
+      )}
     </label>
   );
 }
