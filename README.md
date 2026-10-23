@@ -20,7 +20,20 @@ npm run tauri dev  # desktop app (needs the Rust toolchain, see below)
 
 `npm run tauri build` produces the installer under `src-tauri/target/release/bundle/`.
 
-Android later: install Android Studio + NDK, then `npm run tauri android init` / `npm run tauri android dev`.
+### Android
+
+One-time setup: Android Studio (its bundled Java), the NDK (`sdkmanager --install ndk/29.0.14206865`), the Rust targets
+(`rustup target add aarch64-linux-android armv7-linux-androideabi i686-linux-android x86_64-linux-android`), and the
+environment variables `JAVA_HOME` (Android Studio's `jbr` folder), `ANDROID_HOME` (the SDK) and `NDK_HOME` (the NDK).
+
+```sh
+npm run tauri android init     # once; generates src-tauri/gen/android (not committed)
+npm run tauri android build -- --debug --apk --target aarch64 --target x86_64   # phones + emulator
+```
+
+The APK lands in `src-tauri/gen/android/app/build/outputs/apk/universal/debug/`. On a phone the screens show one panel
+at a time; data comes over with Import (a Backup from the desktop app) through the system file picker, and Backup saves
+back out the same way. Linking with Lorekeeper isn't available on Android yet.
 
 ## Data
 
