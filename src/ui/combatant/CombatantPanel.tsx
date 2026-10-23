@@ -3,7 +3,7 @@
  * Lorekeeper page, if it came from one), status, token description, stat
  * block, and trackers (health, dying rolls, conditions).
  */
-import { BookOpen } from 'lucide-react';
+import { ArrowLeft, BookOpen } from 'lucide-react';
 import type { Combatant } from '../../domain/combat/types';
 import type { Encounter } from '../../domain/library/types';
 import { openInLorekeeper } from '../../state/appLinks';
@@ -66,6 +66,9 @@ export function CombatantPanel() {
   if (!encounter || !combatant) {
     return (
       <aside className="panel combatant-panel">
+        <button className="icon phone-only" title="Back to the initiative order" onClick={() => useUi.getState().closeDetails()}>
+          <ArrowLeft size={18} />
+        </button>
         <p className="empty-state">Select a character in the initiative order.</p>
       </aside>
     );
@@ -75,6 +78,9 @@ export function CombatantPanel() {
     <aside className="panel combatant-panel">
       <div className="combatant-header">
         <div className="row">
+          <button className="icon phone-only" title="Back to the initiative order" onClick={() => useUi.getState().closeDetails()}>
+            <ArrowLeft size={18} />
+          </button>
           <h2 className="spacer">{combatant.name}</h2>
           {template?.lore && (
             <button className="icon" title="Open in Lorekeeper" onClick={() => openInLorekeeper(template.lore!)}>

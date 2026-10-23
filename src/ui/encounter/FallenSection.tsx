@@ -20,7 +20,7 @@ interface Props {
 /** Collapsible list of combatants out of the order (killed or stabilized). */
 export function FallenSection({ encounter, title, combatants }: Props) {
   const [open, setOpen] = useState(false);
-  const selectCombatant = useUi((s) => s.selectCombatant);
+  const openCombatant = useUi((s) => s.openCombatant);
   if (combatants.length === 0) return null;
   return (
     <div className="fallen-section">
@@ -30,7 +30,7 @@ export function FallenSection({ encounter, title, combatants }: Props) {
       </button>
       {open &&
         combatants.map((c) => (
-          <div key={c.id} className="fallen-row" onClick={() => selectCombatant(encounter.id, c.id)}>
+          <div key={c.id} className="fallen-row" onClick={() => openCombatant(encounter.id, c.id)}>
             <span>{c.name}</span>
             {c.tokenDescription && <span className="muted"> · {c.tokenDescription}</span>}
             <span className="spacer" />

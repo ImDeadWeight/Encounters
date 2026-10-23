@@ -25,6 +25,7 @@ interface Props {
 export function CombatantRow({ encounter, combatant: c }: Props) {
   const selected = useUi((s) => s.selectedCombatant[encounter.id] === c.id);
   const selectCombatant = useUi((s) => s.selectCombatant);
+  const openCombatant = useUi((s) => s.openCombatant);
   const rules = useCombatRules(encounter.formatId);
   const isTurn = encounter.combat.currentId === c.id;
   const dying = c.status === 'dying';
@@ -38,7 +39,10 @@ export function CombatantRow({ encounter, combatant: c }: Props) {
   return (
     <div
       className={`combatant-row${selected ? ' selected' : ''}${isTurn ? ' current' : ''}${dying ? ' dying' : ''}`}
-      onClick={() => selectCombatant(encounter.id, c.id)}
+      // Tapping the row opens the combatant (on a phone, its panel); buttons in the row (dying rolls) only select it.
+      onClick={(e) =>
+        e.target instanceof Element && e.target.closest('button') ? selectCombatant(encounter.id, c.id) : openCombatant(encounter.id, c.id)
+      }
     >
       <div className="combatant-main">
         <span

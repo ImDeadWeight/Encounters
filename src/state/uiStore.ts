@@ -6,6 +6,7 @@ import { create } from 'zustand';
 import type { FormatId } from '../domain/formats/formatIds';
 import type { Id } from '../domain/ids';
 import type { TransferFile } from '../domain/transfer/types';
+import { isPhoneLayout } from '../platform';
 
 /** Things the Create screen can make. */
 export type CreateKind = 'campaign' | 'area' | 'encounter' | 'character';
@@ -46,6 +47,12 @@ interface UiState {
   /** Remembered per encounter so switching encounters loses nothing. */
   selectedCombatant: Record<Id, Id | null>;
   sidebarCollapsed: boolean;
+  /**
+   * Phones only: the combatant panel is showing in place of the initiative
+   * order. Set by tapping a combatant, not by turns moving on (which also
+   * select whoever's turn it is).
+   */
+  detailsOpen: boolean;
   /** Tree nodes (campaigns/areas) the user has collapsed; expanded by default. */
   collapsedNodes: Record<Id, boolean>;
   /** Open dialogs, bottom to top; only the top one is interactive. */
@@ -55,6 +62,10 @@ interface UiState {
   selectEncounter(id: Id | null): void;
   /** Shows a combatant in the right panel (remembered per encounter). */
   selectCombatant(encounterId: Id, combatantId: Id | null): void;
+  /** The user tapped a combatant: select it and, on a phone, show its panel. */
+  openCombatant(encounterId: Id, combatantId: Id): void;
+  /** Phones: back from the combatant panel to the initiative order. */
+  closeDetails(): void;
   /** Collapses or expands the left panel. */
   toggleSidebar(): void;
   /** Flips a tree node between collapsed and expanded. */
@@ -77,12 +88,17 @@ export const useUi = create<UiState>((set) => ({
   selectedEncounterId: null,
   selectedCombatant: {},
   sidebarCollapsed: false,
+  detailsOpen: false,
   collapsedNodes: {},
   modals: [],
   notices: [],
-  selectEncounter: (id) => set({ selectedEncounterId: id }),
+  // On a phone the encounter replaces the sidebar, so opening one folds the sidebar away.
+  selectEncounter: (id) => set({ selectedEncounterId: id, detailsOpen: false, ...(id && isPhoneLayout() ? { sidebarCollapsed: true } : {}) }),
   selectCombatant: (encounterId, combatantId) =>
     set((s) => ({ selectedCombatant: { ...s.selectedCombatant, [encounterId]: combatantId } })),
+  openCombatant: (encounterId, combatantId) =>
+    set((s) => ({ selectedCombatant: { ...s.selectedCombatant, [encounterId]: combatantId }, detailsOpen: true })),
+  closeDetails: () => set({ detailsOpen: false }),
   toggleSidebar: () => set((s) => ({ sidebarCollapsed: !s.sidebarCollapsed })),
   toggleNode: (id) => set((s) => ({ collapsedNodes: { ...s.collapsedNodes, [id]: !s.collapsedNodes[id] } })),
   openModal: (m) => set((s) => ({ modals: [...s.modals, m] })),
