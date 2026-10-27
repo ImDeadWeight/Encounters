@@ -1,3 +1,5 @@
+<img src="app-icon.svg" alt="Encounters icon" width="96">
+
 # Encounters
 
 A DM companion for building encounters ahead of time and running them with a live initiative tracker.
