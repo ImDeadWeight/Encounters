@@ -6,8 +6,8 @@ import { describe, expect, it } from 'vitest';
 import type { CharacterTemplate } from '../characters';
 import { createEmptyStatBlock } from '../formats/dnd5e/statBlock';
 import { addToCombatants } from './combatantFactory';
-import { areaContents, deleteArea, flattenAreas, moveArea, moveEncounter, normalizeAreas } from './tree';
-import type { Library } from './types';
+import { areaContents, deleteArea, filterLibrary, flattenAreas, moveArea, moveEncounter, normalizeAreas } from './tree';
+import type { Encounter, Library } from './types';
 import { inactiveCombat } from '../combat/types';
 
 /** NPC with 2d6 hit dice. */
@@ -109,5 +109,46 @@ describe('tree moves', () => {
       expect(fixed.filter((a) => a.parentAreaId === null)).toHaveLength(1);
       expect(new Set(fixed.map((a) => a.campaignId)).size).toBe(1);
     });
+  });
+});
+
+describe('sidebar search', () => {
+  const encounter = (id: string, name: string, campaignId: string | null, areaId: string | null): Encounter =>
+    ({ id, name, campaignId, areaId, formatId: 'dnd5e', combatants: [], combat: inactiveCombat() });
+  // One › Mines › Shaft holds "Cave-in"; "Ambush" is loose in One; "Bandits" is unfiled.
+  const lib: Library = {
+    campaigns: [{ id: 'c1', name: 'One', formatId: null }, { id: 'c2', name: 'Two', formatId: null }],
+    areas: [
+      { id: 'mines', name: 'Mines', campaignId: 'c1', parentAreaId: null },
+      { id: 'shaft', name: 'Shaft', campaignId: 'c1', parentAreaId: 'mines' },
+    ],
+    encounters: [
+      encounter('cave', 'Cave-in', 'c1', 'shaft'),
+      encounter('ambush', 'Ambush', 'c1', null),
+      encounter('bandits', 'Bandits', null, null),
+    ],
+  };
+  const visible = (query: string) => [...(filterLibrary(lib, query)?.visible ?? [])].sort();
+
+  it('is off for a blank search', () => {
+    expect(filterLibrary(lib, ' ')).toBeNull();
+  });
+
+  it('shows a matching encounter with its areas and campaign, opened', () => {
+    const filter = filterLibrary(lib, 'CAVE')!;
+    expect([...filter.visible].sort()).toEqual(['c1', 'cave', 'mines', 'shaft']);
+    expect([...filter.opened].sort()).toEqual(['c1', 'mines', 'shaft']);
+  });
+
+  it('shows everything inside a matching area without opening it', () => {
+    const filter = filterLibrary(lib, 'mines')!;
+    expect([...filter.visible].sort()).toEqual(['c1', 'cave', 'mines', 'shaft']);
+    expect([...filter.opened]).toEqual(['c1']);
+  });
+
+  it('finds unfiled encounters and matching campaigns', () => {
+    expect(visible('band')).toEqual(['bandits']);
+    expect(visible('two')).toEqual(['c2']);
+    expect(visible('zzz')).toEqual([]);
   });
 });

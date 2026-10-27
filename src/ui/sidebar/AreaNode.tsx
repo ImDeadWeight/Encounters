@@ -3,6 +3,7 @@
  * beneath.
  */
 import { useShallow } from 'zustand/react/shallow';
+import type { Id } from '../../domain/ids';
 import type { Area } from '../../domain/library/types';
 import { areaContents, childAreasOf, encountersOfArea } from '../../domain/library/tree';
 import { useLibrary } from '../../state/libraryStore';
@@ -10,14 +11,17 @@ import { exportItems } from '../../state/transferActions';
 import { useUi } from '../../state/uiStore';
 import { confirmThen } from '../common/ConfirmDialog';
 import { EncounterNode } from './EncounterNode';
+import { useNodeOpen, useTreeFilter } from './SidebarSearch';
 import { TreeChildren, TreeRow } from './TreeRow';
 
 /** Collapsible, draggable area that accepts dropped areas and encounters; + creates an area or encounter in it. */
 export function AreaNode({ area, depth }: { area: Area; depth: number }) {
-  const children = useLibrary(useShallow((s) => childAreasOf(s, area.id)));
-  const encounters = useLibrary(useShallow((s) => encountersOfArea(s, area.id)));
-  const collapsed = useUi((s) => !!s.collapsedNodes[area.id]);
-  const { toggleNode, openModal } = useUi.getState();
+  const filter = useTreeFilter();
+  const shown = (id: Id) => !filter || filter.visible.has(id);
+  const children = useLibrary(useShallow((s) => childAreasOf(s, area.id))).filter((a) => shown(a.id));
+  const encounters = useLibrary(useShallow((s) => encountersOfArea(s, area.id))).filter((e) => shown(e.id));
+  const { expanded, toggle } = useNodeOpen(area.id);
+  const { openModal } = useUi.getState();
   const { rename, deleteArea } = useLibrary.getState();
 
   // Delete the area and everything nested in it after confirming.
@@ -36,8 +40,8 @@ export function AreaNode({ area, depth }: { area: Area; depth: number }) {
       <TreeRow
         depth={depth}
         label={area.name}
-        expanded={!collapsed}
-        onToggle={() => toggleNode(area.id)}
+        expanded={expanded}
+        onToggle={toggle}
         onAdd={() =>
           openModal({
             type: 'create',
@@ -52,7 +56,7 @@ export function AreaNode({ area, depth }: { area: Area; depth: number }) {
         drag={{ type: 'area', id: area.id }}
         drop={{ type: 'area', id: area.id }}
       />
-      {!collapsed && (
+      {expanded && (
         <TreeChildren parentDepth={depth}>
           {children.map((a) => <AreaNode key={a.id} area={a} depth={depth + 1} />)}
           {encounters.map((e) => <EncounterNode key={e.id} encounter={e} depth={depth + 1} />)}

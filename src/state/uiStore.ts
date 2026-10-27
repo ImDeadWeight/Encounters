@@ -1,6 +1,7 @@
 /**
- * @file UI store: what's selected, what's collapsed, the stack of open
- * dialogs, and on-screen notices. Not saved; resets when the app restarts.
+ * @file UI store: what's selected, what's collapsed, the sidebar search, the
+ * stack of open dialogs, and on-screen notices. Not saved; resets when the app
+ * restarts.
  */
 import { create } from 'zustand';
 import type { FormatId } from '../domain/formats/formatIds';
@@ -55,6 +56,10 @@ interface UiState {
   detailsOpen: boolean;
   /** Tree nodes (campaigns/areas) the user has collapsed; expanded by default. */
   collapsedNodes: Record<Id, boolean>;
+  /** The sidebar's search text; blank shows the whole tree. */
+  sidebarSearch: string;
+  /** Tree nodes opened or closed by hand during the current search (on top of what the search opens). */
+  searchToggled: Record<Id, boolean>;
   /** Open dialogs, bottom to top; only the top one is interactive. */
   modals: Modal[];
   notices: Notice[];
@@ -70,6 +75,10 @@ interface UiState {
   toggleSidebar(): void;
   /** Flips a tree node between collapsed and expanded. */
   toggleNode(id: Id): void;
+  /** Changes the sidebar search, forgetting nodes toggled during the last one. */
+  setSidebarSearch(text: string): void;
+  /** Opens or closes a tree node for the current search only. */
+  toggleSearchNode(id: Id): void;
   /** Opens a dialog on top of any already open. */
   openModal(m: Modal): void;
   /** Closes the top dialog. */
@@ -90,6 +99,8 @@ export const useUi = create<UiState>((set) => ({
   sidebarCollapsed: false,
   detailsOpen: false,
   collapsedNodes: {},
+  sidebarSearch: '',
+  searchToggled: {},
   modals: [],
   notices: [],
   // On a phone the encounter replaces the sidebar, so opening one folds the sidebar away.
@@ -101,6 +112,8 @@ export const useUi = create<UiState>((set) => ({
   closeDetails: () => set({ detailsOpen: false }),
   toggleSidebar: () => set((s) => ({ sidebarCollapsed: !s.sidebarCollapsed })),
   toggleNode: (id) => set((s) => ({ collapsedNodes: { ...s.collapsedNodes, [id]: !s.collapsedNodes[id] } })),
+  setSidebarSearch: (text) => set({ sidebarSearch: text, searchToggled: {} }),
+  toggleSearchNode: (id) => set((s) => ({ searchToggled: { ...s.searchToggled, [id]: !s.searchToggled[id] } })),
   openModal: (m) => set((s) => ({ modals: [...s.modals, m] })),
   closeModal: () => set((s) => ({ modals: s.modals.slice(0, -1) })),
   notify: (tone, text) => set((s) => ({ notices: [...s.notices, { id: ++noticeSeq, tone, text }] })),

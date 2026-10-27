@@ -105,6 +105,58 @@ export function unfiledEncounters(lib: Library): Encounter[] {
   return lib.encounters.filter((e) => e.campaignId === null);
 }
 
+/** What the sidebar shows while searching. */
+export interface TreeFilter {
+  /** Campaigns, areas and encounters to show: matches, what's above them, and everything inside a matching campaign or area. */
+  visible: Set<Id>;
+  /** Campaigns and areas opened because a match is inside them. */
+  opened: Set<Id>;
+}
+
+/**
+ * Narrows the sidebar tree to a search: campaigns, areas and encounters whose
+ * names contain the text (ignoring case), the campaigns and areas above them,
+ * and everything inside a matching campaign or area. Null when the search is
+ * blank.
+ */
+export function filterLibrary(lib: Library, query: string): TreeFilter | null {
+  const q = query.trim().toLowerCase();
+  if (!q) return null;
+  const areaIds = new Set(lib.areas.map((a) => a.id));
+  // Where each campaign and area sits; an area whose parent is missing shows under its campaign (see areasOf).
+  const parentOf = new Map<Id, Id | null>([
+    ...lib.campaigns.map((c) => [c.id, null] as const),
+    ...lib.areas.map((a) => [a.id, a.parentAreaId && areaIds.has(a.parentAreaId) ? a.parentAreaId : a.campaignId] as const),
+  ]);
+  const matchingNodes = new Set(
+    [...lib.campaigns, ...lib.areas].filter((n) => n.name.toLowerCase().includes(q)).map((n) => n.id),
+  );
+  // The campaigns and areas above an item, nearest first (bounded in case of a parent loop).
+  const above = (parentId: Id | null) => {
+    const chain: Id[] = [];
+    for (let id = parentId; id !== null && parentOf.has(id) && chain.length < parentOf.size; id = parentOf.get(id)!) chain.push(id);
+    return chain;
+  };
+  const visible = new Set<Id>();
+  const opened = new Set<Id>();
+  const consider = (id: Id, parentId: Id | null, name: string) => {
+    const chain = above(parentId);
+    if (name.toLowerCase().includes(q)) {
+      visible.add(id);
+      for (const n of chain) {
+        visible.add(n);
+        opened.add(n);
+      }
+    } else if (chain.some((n) => matchingNodes.has(n))) {
+      visible.add(id);
+    }
+  };
+  for (const c of lib.campaigns) consider(c.id, null, c.name);
+  for (const a of lib.areas) consider(a.id, parentOf.get(a.id) ?? null, a.name);
+  for (const e of lib.encounters) consider(e.id, e.areaId ?? e.campaignId, e.name);
+  return { visible, opened };
+}
+
 /** Drop target for an encounter. An area target implies its campaign. */
 export type EncounterDestination =
   | { kind: 'root' }

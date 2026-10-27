@@ -3,6 +3,7 @@
  * beneath.
  */
 import { useShallow } from 'zustand/react/shallow';
+import type { Id } from '../../domain/ids';
 import type { Campaign } from '../../domain/library/types';
 import { areasOf, looseEncountersOf } from '../../domain/library/tree';
 import { useLibrary } from '../../state/libraryStore';
@@ -11,14 +12,17 @@ import { useUi } from '../../state/uiStore';
 import { confirmThen } from '../common/ConfirmDialog';
 import { AreaNode } from './AreaNode';
 import { EncounterNode } from './EncounterNode';
+import { useNodeOpen, useTreeFilter } from './SidebarSearch';
 import { TreeChildren, TreeRow } from './TreeRow';
 
 /** Collapsible campaign that accepts dropped areas and encounters; + creates an area or encounter in it. */
 export function CampaignNode({ campaign }: { campaign: Campaign }) {
-  const areas = useLibrary(useShallow((s) => areasOf(s, campaign.id)));
-  const encounters = useLibrary(useShallow((s) => looseEncountersOf(s, campaign.id)));
-  const collapsed = useUi((s) => !!s.collapsedNodes[campaign.id]);
-  const { toggleNode, openModal } = useUi.getState();
+  const filter = useTreeFilter();
+  const shown = (id: Id) => !filter || filter.visible.has(id);
+  const areas = useLibrary(useShallow((s) => areasOf(s, campaign.id))).filter((a) => shown(a.id));
+  const encounters = useLibrary(useShallow((s) => looseEncountersOf(s, campaign.id))).filter((e) => shown(e.id));
+  const { expanded, toggle } = useNodeOpen(campaign.id);
+  const { openModal } = useUi.getState();
   const { rename, deleteCampaign } = useLibrary.getState();
 
   // Delete the campaign and everything in it after confirming.
@@ -34,8 +38,8 @@ export function CampaignNode({ campaign }: { campaign: Campaign }) {
       <TreeRow
         depth={0}
         label={campaign.name}
-        expanded={!collapsed}
-        onToggle={() => toggleNode(campaign.id)}
+        expanded={expanded}
+        onToggle={toggle}
         onAdd={() =>
           openModal({
             type: 'create',
@@ -49,7 +53,7 @@ export function CampaignNode({ campaign }: { campaign: Campaign }) {
         onRename={(name) => rename('campaign', campaign.id, name)}
         drop={{ type: 'campaign', id: campaign.id }}
       />
-      {!collapsed && (
+      {expanded && (
         <TreeChildren parentDepth={0}>
           {areas.map((a) => <AreaNode key={a.id} area={a} depth={1} />)}
           {encounters.map((e) => <EncounterNode key={e.id} encounter={e} depth={1} />)}

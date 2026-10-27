@@ -34,6 +34,11 @@
     width: auto;
   }
 
+  /* The sidebar fills the screen, so there's nothing to resize. */
+  .sidebar .sidebar-resizer {
+    display: none;
+  }
+
   /* Initiative order, or (after tapping a combatant) its panel. */
   .workspace:not(.details-open) .combatant-panel,
   .workspace.details-open .main-panel {
