@@ -6,7 +6,7 @@ import { useMemo } from 'react';
 import type { Id } from '../../domain/ids';
 import { flattenAreas } from '../../domain/library/tree';
 import { useLibrary } from '../../state/libraryStore';
-import { Select } from '../common/Select';
+import { Select } from 'campaign-link/ui/common/Select';
 
 /** Props for ParentPicker. */
 interface Props {

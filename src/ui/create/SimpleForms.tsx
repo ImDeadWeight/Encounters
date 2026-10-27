@@ -2,12 +2,12 @@
  * @file Create-campaign and create-area forms, and the campaign format field.
  */
 import { useState } from 'react';
-import type { FormatId } from '../../domain/formats/formatIds';
-import { FORMAT_LIST } from '../../domain/formats/registry';
+import type { FormatId } from 'campaign-link/formats/formatIds';
+import { FORMAT_LIST } from 'campaign-link/formats/registry';
 import type { Id } from '../../domain/ids';
 import { useLibrary } from '../../state/libraryStore';
 import { useUi } from '../../state/uiStore';
-import { Select } from '../common/Select';
+import { Select } from 'campaign-link/ui/common/Select';
 import { useReportDirty } from '../common/unsavedChanges';
 import { ParentPicker } from './ParentPicker';
 

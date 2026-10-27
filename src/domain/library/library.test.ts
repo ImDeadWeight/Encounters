@@ -4,7 +4,7 @@
  */
 import { describe, expect, it } from 'vitest';
 import type { CharacterTemplate } from '../characters';
-import { createEmptyStatBlock } from '../formats/dnd5e/statBlock';
+import { createEmptyStatBlock } from 'campaign-link/formats/dnd5e/statBlock';
 import { addToCombatants } from './combatantFactory';
 import { areaContents, deleteArea, filterLibrary, flattenAreas, moveArea, moveEncounter, normalizeAreas } from './tree';
 import type { Encounter, Library } from './types';

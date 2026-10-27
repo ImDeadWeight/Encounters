@@ -14,8 +14,8 @@ import { nextTurn, nextTurnBlockers } from '../../combat/turnFlow';
 import { inactiveCombat } from '../../combat/types';
 import { addToCombatants } from '../../library/combatantFactory';
 import type { Encounter } from '../../library/types';
-import { pf2e } from './index';
-import { createEmptyPf2eStatBlock } from './statBlock';
+import { pf2e } from 'campaign-link/formats/pf2e/index';
+import { createEmptyPf2eStatBlock } from 'campaign-link/formats/pf2e/statBlock';
 
 /** A level 1 goblin with Perception +2 and 6 HP. */
 const goblin: CharacterTemplate = {

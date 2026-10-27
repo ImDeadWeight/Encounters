@@ -5,7 +5,7 @@
  * and link it to a Lorekeeper notebook.
  */
 import { useMemo, useState } from 'react';
-import type { FormatId } from '../../domain/formats/formatIds';
+import type { FormatId } from 'campaign-link/formats/formatIds';
 import { descendantAreaIds, type EncounterDestination } from '../../domain/library/tree';
 import type { Id } from '../../domain/ids';
 import { linkCampaign, useCampaignLink } from '../../state/campaignLink';

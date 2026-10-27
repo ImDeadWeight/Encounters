@@ -84,7 +84,11 @@ function setClaim(campaignId: Id, claim: LinkClaim | null) {
   });
 }
 
-/** What Lorekeeper needs to know about a campaign: its areas, encounters and the characters in them. */
+/**
+ * What Lorekeeper needs to know about a campaign: its areas, encounters, the
+ * characters in them, and characters made from the linked notebook's pages
+ * (with their stat blocks, so the page can take one).
+ */
 function buildCatalog(campaignId: Id): EncountersCatalog | null {
   const { campaigns, areas, encounters } = useLibrary.getState();
   const campaign = campaigns.find((c) => c.id === campaignId);
@@ -94,6 +98,7 @@ function buildCatalog(campaignId: Id): EncountersCatalog | null {
   // Only pages of the linked notebook mean anything to it.
   const notebookId = useCampaignLink.getState().claims[campaignId]?.partnerId;
   return makeEncountersCatalog(campaignId, campaign.name, {
+    ...(campaign.formatId ? { formatId: campaign.formatId } : {}),
     areas: areas
       .filter((a) => a.campaignId === campaignId)
       .map((a) => ({ id: a.id, name: a.name, parentAreaId: a.parentAreaId })),
@@ -107,13 +112,17 @@ function buildCatalog(campaignId: Id): EncountersCatalog | null {
     })),
     characters: useCharacters
       .getState()
-      .templates.filter((t) => used.has(t.id))
-      .map((t) => ({
-        id: t.id,
-        name: t.name,
-        kind: t.kind,
-        lorePageId: t.lore && t.lore.notebookId === notebookId ? t.lore.pageId : null,
-      })),
+      .templates.filter((t) => used.has(t.id) || (notebookId && t.lore?.notebookId === notebookId))
+      .map((t) => {
+        const lorePageId = t.lore && t.lore.notebookId === notebookId ? t.lore.pageId : null;
+        return {
+          id: t.id,
+          name: t.name,
+          kind: t.kind,
+          lorePageId,
+          ...(lorePageId && t.statBlock ? { statBlock: { formatId: t.formatId, statBlock: t.statBlock } } : {}),
+        };
+      }),
   });
 }
 

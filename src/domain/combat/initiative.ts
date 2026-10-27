@@ -3,7 +3,7 @@
  * initiative (one roll per side each round), sorting the turn order, and
  * starting the first turn once everyone has a value.
  */
-import { rollDie } from '../dice';
+import { rollDie } from 'campaign-link/formats/dice';
 import type { Id } from '../ids';
 import type { Encounter } from '../library/types';
 import type { CombatRules } from './rules';

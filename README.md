@@ -56,19 +56,25 @@ available.
 - **Name suggestions**: while naming a character, matching Character pages from linked notebooks appear under the
   Name field. Picking one fills in the name and PC/NPC and remembers the page; the editor shows it, with
   Open in Lorekeeper. The combatant panel has the same button.
+- **Stat blocks**: Lorekeeper's Character pages can hold their own stat block. When a character's page has one that
+  differs, the character editor offers **Use Lorekeeper's**. Lorekeeper can take this app's copy the same way;
+  neither app changes the other's.
 - **Links**: `encounters://encounter/<id>` and `encounters://character/<id>` open in Encounters (the running window,
   if there is one). The scheme is registered each time the app starts, so development builds work too.
 
 ## Layout
 
-- `src/domain` — pure logic, no React: formats (5e rules/stat block), combat engine, library tree.
+- `src/domain` — pure logic, no React: combat engine, library tree, characters, import/export.
+- The game formats (rules and stat blocks) and their stat block views and editors live in the shared
+  [campaign-link](https://github.com/ImDeadWeight/campaign-link) package (`campaign-link/formats/*`,
+  `campaign-link/ui/*`), which Lorekeeper also uses.
 - `src/state` — zustand stores, undo/redo history, persistence.
 - `src/storage` — Tauri file store / browser fallback.
 - `src/ui` — components, grouped by screen area.
 - `src-tauri` — the native shell.
 
-Adding a game format = a `GameFormat` in `src/domain/formats/<id>` plus a View/Editor pair in `src/ui/formats/<id>`,
-registered in `registry.ts`, `formatUi.ts`, the `FormatId` union and the `StatBlock` union. The format supplies its
+Adding a game format (in campaign-link) = a `GameFormat` in `src/formats/<id>` plus a View/Editor pair in
+`src/ui/formats/<id>`, registered in `registry.ts`, `formatUi.ts`, the `FormatId` union and the `StatBlock` union. The format supplies its
 combat rules as data: initiative die and tiebreak, dying rules (`deathSaves`, `dyingValue`, `negativeHp`,
 `deadAtZero`), and whether conditions carry a value. Every encounter uses one format, and only that format's
 characters can join it.

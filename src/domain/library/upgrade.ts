@@ -6,7 +6,7 @@
 import type { Combatant } from '../combat/types';
 import type { ActiveCondition, CustomCondition } from '../conditions';
 import { repeatsSaveLookup } from '../conditionDefaults';
-import type { FormatId } from '../formats/formatIds';
+import type { FormatId } from 'campaign-link/formats/formatIds';
 import type { Encounter } from './types';
 
 /** The only format that existed before encounters stored one. */

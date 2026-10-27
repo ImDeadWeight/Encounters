@@ -6,7 +6,7 @@ import { useState } from 'react';
 import { addCondition, removeConditionType } from '../../domain/combat/conditions';
 import type { Combatant } from '../../domain/combat/types';
 import type { ConditionDef } from '../../domain/conditions';
-import type { FormatId } from '../../domain/formats/formatIds';
+import type { FormatId } from 'campaign-link/formats/formatIds';
 import type { Id } from '../../domain/ids';
 import { conditionsFor, useCharacters } from '../../state/characterStore';
 import { runCombatAction } from '../../state/combatStore';

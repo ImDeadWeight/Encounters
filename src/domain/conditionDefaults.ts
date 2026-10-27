@@ -5,8 +5,8 @@
  * per-turn flag.
  */
 import type { CustomCondition } from './conditions';
-import type { FormatId } from './formats/formatIds';
-import { FORMAT_LIST } from './formats/registry';
+import type { FormatId } from 'campaign-link/formats/formatIds';
+import { FORMAT_LIST } from 'campaign-link/formats/registry';
 import type { Id } from './ids';
 
 /** Default "save each turn" for a condition id: built-in or custom definition, else no. */

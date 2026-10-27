@@ -5,7 +5,7 @@
  */
 import { useMemo } from 'react';
 import { combatRulesFrom, type CombatRules } from '../domain/combat/rules';
-import type { FormatId } from '../domain/formats/formatIds';
+import type { FormatId } from 'campaign-link/formats/formatIds';
 import { useCharacters } from './characterStore';
 
 /** Combat rules for a format that update when character templates change. */

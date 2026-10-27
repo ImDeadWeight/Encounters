@@ -5,8 +5,8 @@
 import { Check, ChevronDown, Plus, Search, Trash2 } from 'lucide-react';
 import { useEffect, useId, useState, type KeyboardEvent } from 'react';
 import { createPortal } from 'react-dom';
-import { scrollOptionIntoView, usePopover } from './usePopover';
-import './select.css';
+import { scrollOptionIntoView, usePopover } from 'campaign-link/ui/common/usePopover';
+import 'campaign-link/ui/common/select.css';
 import './searchPicker.css';
 
 /** Anything the picker can list. */

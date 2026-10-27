@@ -4,7 +4,7 @@
  * references resolve within the file for its kind.
  */
 import { repeatsSaveLookup } from '../conditionDefaults';
-import { fail, InvalidData, readArray, readInt, readObject, readOneOf, readString } from '../validation/read';
+import { fail, InvalidData, readArray, readInt, readObject, readOneOf, readString } from 'campaign-link/formats/read';
 import {
   assertUniqueIds,
   readArea,

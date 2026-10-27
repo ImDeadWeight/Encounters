@@ -6,7 +6,7 @@
 import { describe, expect, it } from 'vitest';
 import type { CharacterTemplate } from '../characters';
 import { inactiveCombat, noDyingProgress, type Combatant } from '../combat/types';
-import { createEmptyStatBlock, type Dnd5eStatBlock } from '../formats/dnd5e/statBlock';
+import { createEmptyStatBlock, type Dnd5eStatBlock } from 'campaign-link/formats/dnd5e/statBlock';
 import type { Encounter } from '../library/types';
 import { applyImport } from './applyImport';
 import { exportArea, exportCampaign, exportCharacters, exportEncounter, exportEverything, toTransferFile } from './exportBundle';

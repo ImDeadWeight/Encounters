@@ -6,8 +6,8 @@
 import { create } from 'zustand';
 import type { CharacterTemplate, Tag } from '../domain/characters';
 import type { ConditionDef, CustomCondition } from '../domain/conditions';
-import type { FormatId } from '../domain/formats/formatIds';
-import { getFormat } from '../domain/formats/registry';
+import type { FormatId } from 'campaign-link/formats/formatIds';
+import { getFormat } from 'campaign-link/formats/registry';
 import { newId, type Id } from '../domain/ids';
 
 /** Character data plus its actions. */

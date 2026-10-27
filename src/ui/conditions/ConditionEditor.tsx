@@ -4,14 +4,14 @@
  */
 import { useState } from 'react';
 import type { CustomCondition } from '../../domain/conditions';
-import type { FormatId } from '../../domain/formats/formatIds';
-import { FORMAT_LIST, getFormat } from '../../domain/formats/registry';
+import type { FormatId } from 'campaign-link/formats/formatIds';
+import { FORMAT_LIST, getFormat } from 'campaign-link/formats/registry';
 import { newId, type Id } from '../../domain/ids';
 import { conditionNameTaken, useCharacters } from '../../state/characterStore';
 import { useLibrary } from '../../state/libraryStore';
 import { useUi } from '../../state/uiStore';
 import { Modal } from '../common/Modal';
-import { Select } from '../common/Select';
+import { Select } from 'campaign-link/ui/common/Select';
 import { sameContent } from '../../domain/transfer/plan';
 import { closeUnlessDirty } from '../common/unsavedChanges';
 import { ConditionFields, emptyConditionValues, type ConditionValues } from './ConditionFields';

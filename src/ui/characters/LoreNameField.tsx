@@ -2,9 +2,13 @@
  * @file Naming a character from Lorekeeper: while typing a name, Character
  * pages from linked notebooks that match appear under the field; picking one
  * fills in the name and PC/NPC and remembers the page. The chip below the
- * form shows which page a character came from, opens it, or forgets it.
+ * form shows which page a character came from, opens it, or forgets it, and
+ * offers the page's stat block when it differs from the character's.
  */
-import { BookOpen, X } from 'lucide-react';
+import { sameStatBlock, type LorePage, type LorekeeperCatalog, type SharedStatBlock } from 'campaign-link';
+import type { FormatId } from 'campaign-link/formats/formatIds';
+import { getFormat } from 'campaign-link/formats/registry';
+import { BookOpen, ScrollText, X } from 'lucide-react';
 import { useMemo, useState, type KeyboardEvent } from 'react';
 import { createPortal } from 'react-dom';
 import type { LoreRef } from '../../domain/characters';
@@ -13,7 +17,7 @@ import { suggestLoreCharacters as matching, type LoreCharacter } from '../../dom
 import { openInLorekeeper } from '../../state/appLinks';
 import { useCampaignLink } from '../../state/campaignLink';
 import { useCharacters } from '../../state/characterStore';
-import { scrollOptionIntoView, usePopover } from '../common/usePopover';
+import { scrollOptionIntoView, usePopover } from 'campaign-link/ui/common/usePopover';
 
 /** Every Character page in the notebooks linked to campaigns on this device. */
 function useLoreCharacters(): LoreCharacter[] {
@@ -125,14 +129,7 @@ export function LoreNameField({ name, lore, templateId, onName, onPick }: FieldP
 
 /** Which Lorekeeper page a character came from, with Open and Forget. Nothing when it didn't come from one. */
 export function LoreSourceChip({ lore, onForget }: { lore: LoreRef | null; onForget(): void }) {
-  const title = useCampaignLink((s) => {
-    if (!lore) return null;
-    for (const catalog of Object.values(s.catalogs)) {
-      if (catalog.notebookId !== lore.notebookId) continue;
-      return catalog.pages.find((p) => p.id === lore.pageId)?.title ?? null;
-    }
-    return null;
-  });
+  const title = useCampaignLink((s) => findLorePage(s.catalogs, lore)?.title ?? null);
   if (!lore) return null;
   return (
     <div className="lore-source row">
@@ -145,6 +142,50 @@ export function LoreSourceChip({ lore, onForget }: { lore: LoreRef | null; onFor
       </button>
       <button type="button" className="icon" title="Forget which page this came from" onClick={onForget}>
         <X size={15} />
+      </button>
+    </div>
+  );
+}
+
+/** The page a character came from, as its linked notebook publishes it; null when that notebook isn't linked here. */
+function findLorePage(catalogs: Record<Id, LorekeeperCatalog>, lore: LoreRef | null): LorePage | null {
+  if (!lore) return null;
+  const catalog = Object.values(catalogs).find((c) => c.notebookId === lore.notebookId);
+  return catalog?.pages.find((p) => p.id === lore.pageId) ?? null;
+}
+
+/** Props for LoreStatBlockOffer. */
+interface OfferProps {
+  lore: LoreRef | null;
+  /** The character's stat block as the form has it; null when it has none. */
+  current: SharedStatBlock | null;
+  /** Set when the character's format can't change (it's in an encounter). */
+  lockedFormatId: FormatId | null;
+  onTake(statBlock: SharedStatBlock): void;
+}
+
+/** When the Lorekeeper page has a stat block other than the character's, offers to use it instead. */
+export function LoreStatBlockOffer({ lore, current, lockedFormatId, onTake }: OfferProps) {
+  const offered = useCampaignLink((s) => findLorePage(s.catalogs, lore)?.statBlock);
+  if (!offered || sameStatBlock(offered, current)) return null;
+  const blocked = lockedFormatId !== null && lockedFormatId !== offered.formatId;
+  return (
+    <div className="lore-source row">
+      <ScrollText size={15} />
+      <span className="spacer">
+        {current ? 'The Lorekeeper page has a different stat block' : 'The Lorekeeper page has a stat block'} ({getFormat(offered.formatId).name}).
+      </span>
+      <button
+        type="button"
+        disabled={blocked}
+        title={
+          blocked
+            ? `It's for ${getFormat(offered.formatId).name}, and this character is in an encounter, so its format can't change`
+            : "Replace this character's stat block with the page's (Save character to keep it)"
+        }
+        onClick={() => onTake(offered)}
+      >
+        Use Lorekeeper's
       </button>
     </div>
   );

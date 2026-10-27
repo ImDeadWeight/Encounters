@@ -6,9 +6,9 @@
  */
 import type { CharacterTemplate } from '../characters';
 import { noDyingProgress, type Combatant } from '../combat/types';
-import { rollFormula } from '../dice';
-import type { FormatId } from '../formats/formatIds';
-import { getFormat } from '../formats/registry';
+import { rollFormula } from 'campaign-link/formats/dice';
+import type { FormatId } from 'campaign-link/formats/formatIds';
+import { getFormat } from 'campaign-link/formats/registry';
 import { newId } from '../ids';
 
 /** One line of the encounter builder's cart: which character, and how many copies. */

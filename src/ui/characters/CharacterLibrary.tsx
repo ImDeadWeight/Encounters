@@ -6,7 +6,7 @@ import { Download, Pencil, Plus, Trash2 } from 'lucide-react';
 import { useState } from 'react';
 import { EMPTY_FILTER, filterTemplates } from '../../domain/characterSearch';
 import type { CharacterTemplate } from '../../domain/characters';
-import type { FormatId } from '../../domain/formats/formatIds';
+import type { FormatId } from 'campaign-link/formats/formatIds';
 import { encountersUsingTemplate } from '../../domain/library/tree';
 import { useCharacters } from '../../state/characterStore';
 import { useLibrary } from '../../state/libraryStore';

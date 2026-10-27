@@ -3,7 +3,7 @@
  * mine / Use imported / Keep both.
  */
 import type { PlanItem, Resolution } from '../../domain/transfer/plan';
-import { Select } from '../common/Select';
+import { Select } from 'campaign-link/ui/common/Select';
 
 /** The three resolutions with button labels and tooltips. */
 const CHOICES: { value: Resolution; label: string; title: string }[] = [

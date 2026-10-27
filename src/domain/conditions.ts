@@ -3,26 +3,11 @@
  * custom ones) and conditions applied to a combatant in an encounter.
  */
 import type { Id } from './ids';
-import type { FormatId } from './formats/formatIds';
+import type { FormatId } from 'campaign-link/formats/formatIds';
+import type { ConditionDef } from 'campaign-link/formats/types';
 
-/** A condition that can be applied, with its rules text. */
-export interface ConditionDef {
-  id: Id;
-  name: string;
-  /** What the condition does to the creature. */
-  effect: string;
-  /** How it usually ends (shown as "Ends: …" under the condition). */
-  endsWhen: string;
-  /**
-   * Default for "save each turn". Conditions themselves rarely demand a roll;
-   * the effect that applies them does, so each applied instance can override this.
-   */
-  repeatsSave: boolean;
-  /** Carries a number, e.g. Frightened 2 (formats with valued conditions only). */
-  valued?: boolean;
-  /** Valued only: the number drops by 1 at the end of the creature's turn; at 0 it ends. */
-  dropsEachTurn?: boolean;
-}
+// Condition definitions are shared with the game formats (campaign-link).
+export type { ConditionDef };
 
 /** A condition created by the user; stored and offered for every character of that format. */
 export interface CustomCondition extends ConditionDef {

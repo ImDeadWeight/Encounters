@@ -4,8 +4,8 @@
  * extra tags ("5e") here without being stored on templates.
  */
 import type { CharacterKind, CharacterTemplate, Tag } from './characters';
-import { formatTagId } from './formats/formatIds';
-import { FORMAT_LIST } from './formats/registry';
+import { formatTagId } from 'campaign-link/formats/formatIds';
+import { FORMAT_LIST } from 'campaign-link/formats/registry';
 
 /** The current search: name text, required tags, and which kind of character to show. */
 export interface CharacterFilter {

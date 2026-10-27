@@ -1,22 +1,22 @@
 /**
  * @file The create/edit character form: PC/NPC, name (with suggestions from
  * linked Lorekeeper notebooks), format, tags, dying rules, and the format's
- * stat block editor.
+ * stat block editor (or the Lorekeeper page's stat block).
  */
 import { useCallback, useState } from 'react';
 import type { CharacterKind, CharacterTemplate, LoreRef, StatBlock } from '../../domain/characters';
-import type { FormatId } from '../../domain/formats/formatIds';
-import type { DyingRules } from '../../domain/formats/formatTypes';
-import { FORMAT_LIST, getFormat } from '../../domain/formats/registry';
+import type { FormatId } from 'campaign-link/formats/formatIds';
+import type { DyingRules } from 'campaign-link/formats/formatTypes';
+import { FORMAT_LIST, getFormat } from 'campaign-link/formats/registry';
 import { encountersUsingTemplate } from '../../domain/library/tree';
 import { sameContent } from '../../domain/transfer/plan';
 import { newId, type Id } from '../../domain/ids';
 import { useCharacters } from '../../state/characterStore';
 import { useLibrary } from '../../state/libraryStore';
-import { Select } from '../common/Select';
+import { Select } from 'campaign-link/ui/common/Select';
 import { closeUnlessDirty, useReportDirty } from '../common/unsavedChanges';
-import { FORMAT_UI } from '../formats/formatUi';
-import { LoreNameField, LoreSourceChip } from './LoreNameField';
+import { FORMAT_UI } from 'campaign-link/ui/formats/formatUi';
+import { LoreNameField, LoreSourceChip, LoreStatBlockOffer } from './LoreNameField';
 import { TagPicker } from './TagPicker';
 import './characters.css';
 
@@ -148,6 +148,12 @@ export function CharacterEditor({ templateId, defaultFormatId = null, onDone, on
         </label>
       </div>
       <LoreSourceChip lore={draft.lore} onForget={() => set({ lore: null })} />
+      <LoreStatBlockOffer
+        lore={draft.lore}
+        current={draft.formatId && draft.statBlock && !draft.skipStatBlock ? { formatId: draft.formatId, statBlock: draft.statBlock } : null}
+        lockedFormatId={usedIn > 0 && draft.formatId ? draft.formatId : null}
+        onTake={({ formatId, statBlock }) => set({ formatId, statBlock, skipStatBlock: false })}
+      />
 
       {/* Not a <label>: clicking a label would activate the first chip's remove button. */}
       <div className="field">

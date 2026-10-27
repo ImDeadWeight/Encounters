@@ -6,8 +6,8 @@ import { Check, ListFilter, Search } from 'lucide-react';
 import { useEffect, useId, useRef, useState, type KeyboardEvent } from 'react';
 import { createPortal } from 'react-dom';
 import type { Tag } from '../../domain/characters';
-import { scrollOptionIntoView, usePopover } from '../common/usePopover';
-import '../common/select.css';
+import { scrollOptionIntoView, usePopover } from 'campaign-link/ui/common/usePopover';
+import 'campaign-link/ui/common/select.css';
 import '../common/searchPicker.css';
 
 /** Props for TagFilterButton (a controlled component). */

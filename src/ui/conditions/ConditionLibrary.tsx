@@ -4,7 +4,7 @@
  */
 import { Pencil, Plus, Trash2 } from 'lucide-react';
 import type { ConditionDef } from '../../domain/conditions';
-import { FORMAT_LIST } from '../../domain/formats/registry';
+import { FORMAT_LIST } from 'campaign-link/formats/registry';
 import { useCharacters } from '../../state/characterStore';
 import { useUi } from '../../state/uiStore';
 import { confirmThen } from '../common/ConfirmDialog';

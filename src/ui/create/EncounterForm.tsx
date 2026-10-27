@@ -3,7 +3,7 @@
  * character cart.
  */
 import { useState } from 'react';
-import type { FormatId } from '../../domain/formats/formatIds';
+import type { FormatId } from 'campaign-link/formats/formatIds';
 import { addToCombatants } from '../../domain/library/combatantFactory';
 import type { Id } from '../../domain/ids';
 import { useCharacters } from '../../state/characterStore';

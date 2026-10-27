@@ -7,8 +7,8 @@ import type { CharacterTemplate, LoreRef, Tag } from '../characters';
 import { MIN_HP } from '../combat/health';
 import type { Combatant, CombatantStatus, CombatState, DyingProgress } from '../combat/types';
 import { MAX_CONDITION_VALUE, type ActiveCondition, type CustomCondition } from '../conditions';
-import type { FormatId } from '../formats/formatIds';
-import { FORMATS } from '../formats/registry';
+import type { FormatId } from 'campaign-link/formats/formatIds';
+import { FORMATS } from 'campaign-link/formats/registry';
 import { LEGACY_FORMAT_ID } from '../library/upgrade';
 import type { Area, Campaign, Encounter } from '../library/types';
 import {
@@ -24,7 +24,7 @@ import {
   readObject,
   readOneOf,
   readString,
-} from '../validation/read';
+} from 'campaign-link/formats/read';
 
 /** Format ids this version of the app understands. */
 const FORMAT_IDS = Object.keys(FORMATS) as FormatId[];

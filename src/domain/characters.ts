@@ -4,17 +4,11 @@
  * templates by id rather than copying them.
  */
 import type { Id } from './ids';
-import type { FormatId } from './formats/formatIds';
-import type { Dnd5eStatBlock } from './formats/dnd5e/statBlock';
-import type { BxStatBlock } from './formats/bx/statBlock';
-import type { D20StatBlock } from './formats/d20/statBlock';
-import type { Pf2eStatBlock } from './formats/pf2e/statBlock';
+import type { FormatId } from 'campaign-link/formats/formatIds';
+import type { CharacterKind, StatBlock } from 'campaign-link/formats/types';
 
-/** Player character or non-player character. */
-export type CharacterKind = 'pc' | 'npc';
-
-/** Union of every format's stat block. Grows as formats are added. */
-export type StatBlock = Dnd5eStatBlock | Pf2eStatBlock | D20StatBlock | BxStatBlock;
+// Character kinds and the stat block union are shared with Lorekeeper (campaign-link).
+export type { CharacterKind, StatBlock };
 
 /** A user-created label for filtering characters (e.g. "Undead", "Goblinoid"). Shared library-wide. */
 export interface Tag {

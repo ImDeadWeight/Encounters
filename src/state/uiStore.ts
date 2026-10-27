@@ -4,7 +4,7 @@
  * restarts.
  */
 import { create } from 'zustand';
-import type { FormatId } from '../domain/formats/formatIds';
+import type { FormatId } from 'campaign-link/formats/formatIds';
 import type { Id } from '../domain/ids';
 import type { TransferFile } from '../domain/transfer/types';
 import { isPhoneLayout } from '../platform';

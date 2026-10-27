@@ -4,8 +4,8 @@
  */
 import { useState } from 'react';
 import type { ConditionDef } from '../../domain/conditions';
-import type { FormatId } from '../../domain/formats/formatIds';
-import { getFormat } from '../../domain/formats/registry';
+import type { FormatId } from 'campaign-link/formats/formatIds';
+import { getFormat } from 'campaign-link/formats/registry';
 import { sameContent } from '../../domain/transfer/plan';
 import { conditionNameTaken, useCharacters } from '../../state/characterStore';
 import { Modal } from '../common/Modal';

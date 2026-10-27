@@ -5,9 +5,9 @@
  * formats directly.
  */
 import { usesDeathSaves, type CharacterTemplate } from '../characters';
-import type { FormatId } from '../formats/formatIds';
-import type { DyingRules } from '../formats/formatTypes';
-import { getFormat } from '../formats/registry';
+import type { FormatId } from 'campaign-link/formats/formatIds';
+import type { DyingRules } from 'campaign-link/formats/formatTypes';
+import { getFormat } from 'campaign-link/formats/registry';
 import type { Id } from '../ids';
 
 /**

@@ -7,7 +7,7 @@
 import { describe, expect, it } from 'vitest';
 import type { Encounter } from '../library/types';
 import type { ConditionDef } from '../conditions';
-import type { DyingRules } from '../formats/formatTypes';
+import type { DyingRules } from 'campaign-link/formats/formatTypes';
 import { addCondition, conditionValue, resolveCondition, setConditionValue, setRequiresResolve } from './conditions';
 import { recordDeathSave, recordRecoveryCheck, recordStabilizationCheck } from './dying';
 import { applyDamage, applyHealing } from './health';

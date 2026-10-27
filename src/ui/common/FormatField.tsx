@@ -2,9 +2,9 @@
  * @file Labelled dropdown for picking a game format, shared by the encounter
  * forms.
  */
-import type { FormatId } from '../../domain/formats/formatIds';
-import { FORMAT_LIST } from '../../domain/formats/registry';
-import { Select } from './Select';
+import type { FormatId } from 'campaign-link/formats/formatIds';
+import { FORMAT_LIST } from 'campaign-link/formats/registry';
+import { Select } from 'campaign-link/ui/common/Select';
 
 /** Props for FormatField. '' means nothing picked yet. */
 interface Props {

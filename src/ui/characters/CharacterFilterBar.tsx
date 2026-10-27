@@ -6,7 +6,7 @@ import { Search, X } from 'lucide-react';
 import { useEffect } from 'react';
 import { filterableTags, type CharacterFilter } from '../../domain/characterSearch';
 import { useCharacters } from '../../state/characterStore';
-import { Select, type SelectOption } from '../common/Select';
+import { Select, type SelectOption } from 'campaign-link/ui/common/Select';
 import { TagFilterButton } from './TagFilterButton';
 
 /** Options for the PC/NPC filter dropdown. */

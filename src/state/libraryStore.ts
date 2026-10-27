@@ -4,7 +4,7 @@
  * Saved to library.json by persistence.ts whenever it changes.
  */
 import { create } from 'zustand';
-import type { FormatId } from '../domain/formats/formatIds';
+import type { FormatId } from 'campaign-link/formats/formatIds';
 import { newId, type Id } from '../domain/ids';
 import { inactiveCombat } from '../domain/combat/types';
 import * as tree from '../domain/library/tree';

@@ -4,7 +4,7 @@
  * state.
  * Encounters with no campaign are "unfiled".
  */
-import type { FormatId } from '../formats/formatIds';
+import type { FormatId } from 'campaign-link/formats/formatIds';
 import type { Id } from '../ids';
 import type { Combatant } from '../combat/types';
 import type { CombatState } from '../combat/types';

@@ -13,10 +13,10 @@ import { nextTurn, nextTurnBlockers } from '../combat/turnFlow';
 import { inactiveCombat } from '../combat/types';
 import { addToCombatants } from '../library/combatantFactory';
 import type { Encounter } from '../library/types';
-import { createEmptyBxStatBlock } from './bx/statBlock';
-import { createEmptyD20StatBlock } from './d20/statBlock';
-import type { FormatId } from './formatIds';
-import { FORMATS } from './registry';
+import { createEmptyBxStatBlock } from 'campaign-link/formats/bx/statBlock';
+import { createEmptyD20StatBlock } from 'campaign-link/formats/d20/statBlock';
+import type { FormatId } from 'campaign-link/formats/formatIds';
+import { FORMATS } from 'campaign-link/formats/registry';
 
 /** An encounter of the given format out of combat, built from templates the way the app does. */
 function encounterOf(formatId: FormatId, templates: CharacterTemplate[], lines: [string, number][]): Encounter {
